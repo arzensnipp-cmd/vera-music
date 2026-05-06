@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'core/services/audio_handler_service.dart';
 import 'presentation/app.dart';
+import 'dart:async';
 
 class _DummyAudioHandler extends BaseAudioHandler {
   @override
@@ -12,6 +13,7 @@ class _DummyAudioHandler extends BaseAudioHandler {
   }
 
   @override
+
   Future<void> pause() async {
     dev.log('DummyAudioHandler: pause() called - audio service not available', name: 'VeraMusic');
   }
