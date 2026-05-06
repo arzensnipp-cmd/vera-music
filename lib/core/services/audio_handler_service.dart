@@ -18,6 +18,11 @@ class VeraAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   }
 
   @override
+  Future<void> addQueueItem(MediaItem item) async {
+    await addQueueItems([item]);
+  }
+
+  @override
   Future<void> addQueueItems(List<MediaItem> items) async {
     try {
       queue.add(items);
