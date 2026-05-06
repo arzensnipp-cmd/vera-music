@@ -94,7 +94,8 @@ class VeraMusicApp extends StatelessWidget {
         },
       ),
     );
-  }
+  },
+);
 }
 
 class MainShell extends StatefulWidget {
