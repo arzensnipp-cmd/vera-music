@@ -34,70 +34,75 @@ class VeraMusicApp extends StatelessWidget {
         return MultiProvider(
           providers: [
             Provider<AudioHandler>.value(value: audioHandler),
-            ChangeNotifierProvider(create: (_) => LocaleProvider(preferences, initialLocale)),
+            ChangeNotifierProvider(
+              create: (_) => LocaleProvider(preferences, initialLocale),
+            ),
           ],
           child: Consumer<LocaleProvider>(
             builder: (context, localeProvider, child) {
               return FutureBuilder(
-            future: localeProvider.initialize(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const MaterialApp(
-                  debugShowCheckedModeBanner: false,
-                  home: Scaffold(
-                    backgroundColor: Color(0xFF000000),
-                    body: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                );
-              }
-              return MaterialApp(
-                debugShowCheckedModeBanner: false,
-                title: 'Vera Music',
-                themeMode: ThemeMode.dark,
-                theme: ThemeData.dark().copyWith(
-                  scaffoldBackgroundColor: const Color(0xFF000000),
-                  colorScheme: ColorScheme.dark(
-                    primary: const Color(0xFFBEA6FF),
-                    secondary: const Color(0xFF7C55FF),
-                    surface: const Color(0xFF000000),
-                  ),
-                  textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
-                ),
-                locale: localeProvider.locale,
-                localizationsDelegates: const [
-                  AppLocalizations.delegate,
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
-                supportedLocales: const [
-                  Locale('en'), // English
-                  Locale('tr'), // Turkish
-                  Locale('de'), // German
-                  Locale('fr'), // French
-                  Locale('es'), // Spanish
-                  Locale('ar'), // Arabic
-                ],
-                localeResolutionCallback: (locale, supportedLocales) {
-                  for (var supportedLocale in supportedLocales) {
-                    if (supportedLocale.languageCode == locale?.languageCode) {
-                      return supportedLocale;
-                    }
+                future: localeProvider.initialize(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const MaterialApp(
+                      debugShowCheckedModeBanner: false,
+                      home: Scaffold(
+                        backgroundColor: Color(0xFF000000),
+                        body: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    );
                   }
-                  return supportedLocales.first; // Default to English
-                },
-                home: const MainShell(),
-              );
-            },
-          ),
-        ),
-      );
-    }
+                  return MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    title: 'Vera Music',
+                    themeMode: ThemeMode.dark,
+                    theme: ThemeData.dark().copyWith(
+                      scaffoldBackgroundColor: const Color(0xFF000000),
+                      colorScheme: const ColorScheme.dark(
+                        primary: Color(0xFFBEA6FF),
+                        secondary: Color(0xFF7C55FF),
+                        surface: Color(0xFF000000),
+                      ),
+                      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+                    ),
+                    locale: localeProvider.locale,
+                    localizationsDelegates: const [
+                      AppLocalizations.delegate,
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                      GlobalCupertinoLocalizations.delegate,
+                    ],
+                    supportedLocales: const [
+                      Locale('en'),
+                      Locale('tr'),
+                      Locale('de'),
+                      Locale('fr'),
+                      Locale('es'),
+                      Locale('ar'),
+                    ],
+                    localeResolutionCallback: (locale, supportedLocales) {
+                      for (var supportedLocale in supportedLocales) {
+                        if (supportedLocale.languageCode == locale?.languageCode) {
+                          return supportedLocale;
+                        }
+                      }
+                      return supportedLocales.first;
+                    },
+                    home: const MainShell(),
+                  );
+                }, // FutureBuilder builder
+              ); // FutureBuilder
+            }, // Consumer builder
+          ), // Consumer
+        ); // MultiProvider
+      }, // ValueListenableBuilder builder
+    ); // ValueListenableBuilder
   }
 }
 
+// ANA EKRAN KABUĞU (MainShell) - VeraMusicApp dışına çıkarıldı (Top-level)
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
@@ -107,7 +112,6 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int selectedIndex = 0;
-
   late final List<Widget> pages;
 
   @override
