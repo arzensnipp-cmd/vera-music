@@ -36,7 +36,9 @@ Future<void> main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final initialLanguage = _resolveInitialLanguage(prefs);
-  await prefs.setString('preferred_language', initialLanguage);
+  if (!prefs.containsKey('language_code')) {
+    await prefs.setString('language_code', initialLanguage);
+  }
 
   final audioHandlerNotifier = ValueNotifier<AudioHandler>(_DummyAudioHandler());
 

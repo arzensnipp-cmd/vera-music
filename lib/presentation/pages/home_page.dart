@@ -16,15 +16,31 @@ class _HomePageState extends State<HomePage> {
   bool _isLoading = true;
   String? _error;
 
+  Locale? _lastLocale;
+
   @override
   void initState() {
     super.initState();
-    _loadTrending();
   }
 
-  Future<void> _loadTrending() async {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final localeCode = Localizations.localeOf(context).languageCode;
+    if (_lastLocale?.languageCode != localeCode) {
+      _lastLocale = Locale(localeCode);
+      _loadTrending(localeCode);
+    }
+  }
+
+  Future<void> _loadTrending(String localeCode) async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
     try {
-      final tracks = await _youtubeService.getTrendingMusic();
+      final tracks = await _youtubeService.getTrendingMusic(localeCode);
       setState(() {
         _trendingTracks = tracks;
         _isLoading = false;

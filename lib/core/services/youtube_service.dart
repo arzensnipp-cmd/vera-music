@@ -26,9 +26,10 @@ class YoutubeService {
     }
   }
 
-  Future<List<Track>> getTrendingMusic() async {
+  Future<List<Track>> getTrendingMusic(String localeCode) async {
     try {
-      final searchList = await _youtube.search.search('trending music');
+      final query = _trendingQueryForLocale(localeCode);
+      final searchList = await _youtube.search.search(query);
       final results = searchList.take(20).toList();
 
       return results.map((video) {
@@ -43,6 +44,23 @@ class YoutubeService {
       }).toList();
     } catch (e) {
       throw Exception('Trending müzik alınamadı: $e');
+    }
+  }
+
+  String _trendingQueryForLocale(String localeCode) {
+    switch (localeCode.toLowerCase()) {
+      case 'tr':
+        return 'trend müzik';
+      case 'de':
+        return 'Trendmusik';
+      case 'fr':
+        return 'musique tendance';
+      case 'es':
+        return 'música de tendencia';
+      case 'ar':
+        return 'الموسيقى الرائجة';
+      default:
+        return 'trending music';
     }
   }
 
