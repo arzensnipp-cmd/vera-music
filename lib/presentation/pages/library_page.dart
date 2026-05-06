@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:audio_service/audio_service.dart';
+import 'package:provider/provider.dart';
 import '../../data/repositories/download_repository.dart';
 import '../../domain/entities/track.dart';
 
@@ -18,6 +20,29 @@ class _LibraryPageState extends State<LibraryPage> {
   void initState() {
     super.initState();
     _localTracksFuture = DownloadRepository().getLocalTracks();
+  }
+
+  Future<void> _playTrack(Track track) async {
+    final l10n = AppLocalizations.of(context)!;
+    final audioHandler = context.read<AudioHandler>();
+    try {
+      final mediaItem = MediaItem(
+        id: track.id,
+        title: track.title,
+        artist: track.author,
+        duration: track.duration,
+        artUri: track.thumbnailUrl.isNotEmpty ? Uri.parse(track.thumbnailUrl) : null,
+        extras: {'audioUrl': track.videoUrl}, // Local file path
+      );
+      await audioHandler.addQueueItem(mediaItem);
+      await audioHandler.play();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${l10n.playbackFailed}: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -124,7 +149,7 @@ class _LibraryPageState extends State<LibraryPage> {
                             ),
                             IconButton(
                               icon: const Icon(Icons.play_circle_fill, color: Color(0xFFBEA6FF), size: 28),
-                              onPressed: () {},
+                              onPressed: () => _playTrack(track),
                             ),
                           ],
                         ),

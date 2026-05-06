@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:audio_service/audio_service.dart';
+import 'package:provider/provider.dart';
 import '../../core/services/youtube_service.dart';
 import '../../domain/entities/track.dart';
 
@@ -54,6 +56,32 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _playTrack(Track track) async {
+    final l10n = AppLocalizations.of(context)!;
+    final audioHandler = context.read<AudioHandler>();
+    try {
+      final audioUrl = await _youtubeService.getBestAudioStreamUrl(track.id);
+      if (audioUrl != null) {
+        final mediaItem = MediaItem(
+          id: track.id,
+          title: track.title,
+          artist: track.author,
+          duration: track.duration,
+          artUri: Uri.parse(track.thumbnailUrl),
+          extras: {'audioUrl': audioUrl},
+        );
+        await audioHandler.addQueueItem(mediaItem);
+        await audioHandler.play();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${l10n.playbackFailed}: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -79,6 +107,7 @@ class _HomePageState extends State<HomePage> {
               tracks: _trendingTracks,
               isLoading: _isLoading,
               error: _error,
+              onTrackPlay: _playTrack,
             ),
           ],
         ),
@@ -91,11 +120,13 @@ class _TrendingSection extends StatelessWidget {
   final List<Track> tracks;
   final bool isLoading;
   final String? error;
+  final Future<void> Function(Track) onTrackPlay;
 
   const _TrendingSection({
     required this.tracks,
     required this.isLoading,
     this.error,
+    required this.onTrackPlay,
   });
 
   @override
@@ -163,7 +194,7 @@ class _TrendingSection extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () => onTrackPlay(track),
                   icon: const Icon(Icons.play_circle_fill, size: 34, color: Color(0xFFBEA6FF)),
                 )
               ],
