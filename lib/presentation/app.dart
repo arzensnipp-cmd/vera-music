@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -36,8 +37,8 @@ class VeraMusicApp extends StatelessWidget {
             ChangeNotifierProvider(create: (_) => LocaleProvider(preferences, initialLocale)),
           ],
           child: Consumer<LocaleProvider>(
-        builder: (context, localeProvider, child) {
-          return FutureBuilder(
+            builder: (context, localeProvider, child) {
+              return FutureBuilder(
             future: localeProvider.initialize(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -90,12 +91,11 @@ class VeraMusicApp extends StatelessWidget {
                 home: const MainShell(),
               );
             },
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
-  },
-);
+  }
 }
 
 class MainShell extends StatefulWidget {

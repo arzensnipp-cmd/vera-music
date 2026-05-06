@@ -86,7 +86,7 @@ Future<void> _initializeAudioService(ValueNotifier<AudioHandler> handlerNotifier
         androidNotificationChannelId: 'vera_music_channel',
         androidNotificationChannelName: 'Vera Music Playback',
         androidNotificationOngoing: true,
-        androidStopForegroundOnPause: false,
+        androidStopForegroundOnPause: true,
         androidNotificationIcon: 'mipmap/ic_launcher',
       ),
     ).timeout(const Duration(seconds: 10), onTimeout: () {
