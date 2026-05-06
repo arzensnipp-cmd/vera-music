@@ -112,20 +112,6 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int selectedIndex = 0;
-  late final List<Widget> pages;
-
-  @override
-  void initState() {
-    super.initState();
-    final audioHandler = context.read<AudioHandler>();
-    pages = <Widget>[
-      const HomePage(),
-      SearchPage(audioHandler: audioHandler),
-      const LibraryPage(),
-      PlayerPage(audioHandler: audioHandler),
-      const SettingsPage(),
-    ];
-  }
 
   void onItemTapped(int index) {
     setState(() {
@@ -136,6 +122,15 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final audioHandler = context.read<AudioHandler>();
+    final pages = <Widget>[
+      const HomePage(),
+      SearchPage(audioHandler: audioHandler),
+      const LibraryPage(),
+      PlayerPage(audioHandler: audioHandler),
+      const SettingsPage(),
+    ];
+
     return Scaffold(
       body: pages[selectedIndex],
       bottomNavigationBar: NavigationBar(

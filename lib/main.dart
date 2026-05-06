@@ -27,6 +27,11 @@ class _DummyAudioHandler extends BaseAudioHandler {
   }
 
   @override
+  Future<void> addQueueItem(MediaItem item) async {
+    dev.log('DummyAudioHandler: addQueueItem() called - audio service not available', name: 'VeraMusic');
+  }
+
+  @override
   Future<void> addQueueItems(List<MediaItem> items) async {
     dev.log('DummyAudioHandler: addQueueItems() called - audio service not available', name: 'VeraMusic');
   }
