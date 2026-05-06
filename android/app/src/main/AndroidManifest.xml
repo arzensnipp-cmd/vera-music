@@ -13,6 +13,8 @@
         android:label="Vera Music"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
+        
+        <meta-data android:name="flutterEmbedding" android:value="2" />
 
         <!-- MainActivity - Flutter Application Entry Point -->
         <activity
