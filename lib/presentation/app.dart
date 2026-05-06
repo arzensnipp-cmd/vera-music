@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -43,7 +44,7 @@ class VeraMusicApp extends StatelessWidget {
                 return const MaterialApp(
                   debugShowCheckedModeBanner: false,
                   home: Scaffold(
-                    backgroundColor: Color(0xFF040404),
+                    backgroundColor: Color(0xFF000000),
                     body: Center(
                       child: CircularProgressIndicator(),
                     ),

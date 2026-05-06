@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../data/repositories/download_repository.dart';
@@ -86,7 +87,7 @@ class _LibraryPageState extends State<LibraryPage> {
                       final track = tracks[index];
                       return Container(
                         decoration: BoxDecoration(
-                          color: const Color(0xFF121212),
+                          color: const Color(0xFF000000),
                           borderRadius: BorderRadius.circular(22),
                           border: Border.all(color: Colors.white10),
                         ),

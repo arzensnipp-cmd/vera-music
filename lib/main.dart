@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/services/audio_handler_service.dart';
@@ -33,6 +34,21 @@ class _DummyAudioHandler extends BaseAudioHandler {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Request permissions
+  dev.log('Requesting permissions...', name: 'VeraMusic');
+  try {
+    if (Platform.isAndroid) {
+      await [
+        Permission.storage,
+        Permission.notification,
+        Permission.bluetoothConnect,
+      ].request();
+    }
+    dev.log('Permissions requested successfully', name: 'VeraMusic');
+  } catch (e) {
+    dev.log('Failed to request permissions: $e', name: 'VeraMusic');
+  }
 
   final prefs = await SharedPreferences.getInstance();
   final initialLanguage = _resolveInitialLanguage(prefs);

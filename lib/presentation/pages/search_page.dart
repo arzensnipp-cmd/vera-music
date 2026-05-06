@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -191,7 +192,7 @@ class _SearchPageState extends State<SearchPage> {
                 hintStyle: const TextStyle(color: Colors.white54),
                 prefixIcon: const Icon(Icons.search, color: Colors.white70),
                 filled: true,
-                fillColor: const Color(0xFF121212),
+                fillColor: const Color(0xFF000000),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: BorderSide.none,
@@ -230,7 +231,7 @@ class _SearchPageState extends State<SearchPage> {
                     final track = _tracks[index];
                     return Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFF121212),
+                        color: const Color(0xFF000000),
                         borderRadius: BorderRadius.circular(22),
                       ),
                       child: ListTile(

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +46,7 @@ class _PlayerPageState extends State<PlayerPage> with TickerProviderStateMixin {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF040404), Color(0xFF121212)],
+            colors: [Color(0xFF000000), Color(0xFF000000)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -84,7 +85,7 @@ class _PlayerPageState extends State<PlayerPage> with TickerProviderStateMixin {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 26, sigmaY: 26),
         child: Container(
-          color: const Color(0xFF090909).withOpacity(0.94),
+          color: const Color(0xFF000000).withOpacity(0.94),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: ListView(
             controller: controller,
