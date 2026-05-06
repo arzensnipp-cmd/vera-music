@@ -1,8 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../core/services/youtube_service.dart';
+import '../../domain/entities/track.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final YoutubeService _youtubeService = YoutubeService();
+  List<Track> _trendingTracks = [];
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTrending();
+  }
+
+  Future<void> _loadTrending() async {
+    try {
+      final tracks = await _youtubeService.getTrendingMusic();
+      setState(() {
+        _trendingTracks = tracks;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Trending müzik yüklenemedi: $e';
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +58,11 @@ class HomePage extends StatelessWidget {
                       color: Colors.white70,
                     )),
             const SizedBox(height: 28),
-            _TrendingSection(),
+            _TrendingSection(
+              tracks: _trendingTracks,
+              isLoading: _isLoading,
+              error: _error,
+            ),
           ],
         ),
       ),
@@ -34,23 +71,43 @@ class HomePage extends StatelessWidget {
 }
 
 class _TrendingSection extends StatelessWidget {
-  final List<Map<String, String>> trending = const [
-    {'title': 'Midnight Chill', 'artist': 'Vera Beats'},
-    {'title': 'Sunset Drive', 'artist': 'Lofi Aura'},
-    {'title': 'Neon Nights', 'artist': 'Vera Wave'},
-  ];
+  final List<Track> tracks;
+  final bool isLoading;
+  final String? error;
+
+  const _TrendingSection({
+    required this.tracks,
+    required this.isLoading,
+    this.error,
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Expanded(
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (error != null) {
+      return Expanded(
+        child: Center(
+          child: Text(error!, style: const TextStyle(color: Colors.red)),
+        ),
+      );
+    }
+
     return Expanded(
       child: ListView.separated(
-        itemCount: trending.length,
+        itemCount: tracks.length,
         separatorBuilder: (_, __) => const SizedBox(height: 18),
         itemBuilder: (context, index) {
-          final item = trending[index];
+          final track = tracks[index];
           return Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF151515),
+              color: const Color(0xFF000000),
               borderRadius: BorderRadius.circular(28),
               boxShadow: const [
                 BoxShadow(
@@ -68,8 +125,9 @@ class _TrendingSection extends StatelessWidget {
                   height: 72,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(22),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF7C55FF), Color(0xFFBEA6FF)],
+                    image: DecorationImage(
+                      image: NetworkImage(track.thumbnailUrl),
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
@@ -78,12 +136,12 @@ class _TrendingSection extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item['title']!,
+                      Text(track.title,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                               )),
                       const SizedBox(height: 6),
-                      Text(item['artist']!, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70)),
+                      Text(track.author, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70)),
                     ],
                   ),
                 ),

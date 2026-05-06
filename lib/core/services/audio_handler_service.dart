@@ -19,13 +19,30 @@ class VeraAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   @override
   Future<void> addQueueItems(List<MediaItem> items) async {
-    queue.add(items);
-    final audioSources = items
-        .map((item) => AudioSource.uri(Uri.parse(item.extras?['audioUrl'] ?? item.id)))
-        .toList();
-    await _playlist.clear();
-    await _playlist.addAll(audioSources);
-    await _player.setAudioSource(_playlist);
+    try {
+      queue.add(items);
+      final audioSources = items.map((item) {
+        final audioUrl = item.extras?['audioUrl'] ?? item.id;
+        if (audioUrl == null || audioUrl.isEmpty) {
+          throw Exception('Geçersiz audio URL: $audioUrl');
+        }
+        return AudioSource.uri(Uri.parse(audioUrl));
+      }).toList();
+      await _playlist.clear();
+      await _playlist.addAll(audioSources);
+      await _player.setAudioSource(_playlist);
+    } catch (e) {
+      // Hata durumunda kullanıcıya uyarı ver, çökertme
+      print('Şarkı yüklenirken hata: $e');
+      // Bir sonraki şarkıya geçmeyi dene
+      if (items.length > 1) {
+        final remainingItems = items.sublist(1);
+        if (remainingItems.isNotEmpty) {
+          await addQueueItems(remainingItems);
+        }
+      }
+      throw Exception('Şu an bu içeriğe erişilemiyor');
+    }
   }
 
   @override

@@ -10,58 +10,85 @@ import 'pages/library_page.dart';
 import 'pages/player_page.dart';
 import 'pages/search_page.dart';
 import 'pages/settings_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class VeraMusicApp extends StatelessWidget {
-  final AudioHandler audioHandler;
+  final ValueListenable<AudioHandler> audioHandlerNotifier;
+  final Locale initialLocale;
+  final SharedPreferences preferences;
 
-  const VeraMusicApp({super.key, required this.audioHandler});
+  const VeraMusicApp({
+    super.key,
+    required this.audioHandlerNotifier,
+    required this.initialLocale,
+    required this.preferences,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        Provider<AudioHandler>.value(value: audioHandler),
-        ChangeNotifierProvider(create: (_) => LocaleProvider()),
-      ],
-      child: Consumer<LocaleProvider>(
+    return ValueListenableBuilder<AudioHandler>(
+      valueListenable: audioHandlerNotifier,
+      builder: (context, audioHandler, child) {
+        return MultiProvider(
+          providers: [
+            Provider<AudioHandler>.value(value: audioHandler),
+            ChangeNotifierProvider(create: (_) => LocaleProvider(preferences, initialLocale)),
+          ],
+          child: Consumer<LocaleProvider>(
         builder: (context, localeProvider, child) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'Vera Music',
-            themeMode: ThemeMode.dark,
-            theme: ThemeData.dark().copyWith(
-              scaffoldBackgroundColor: const Color(0xFF040404),
-              colorScheme: ColorScheme.dark(
-                primary: const Color(0xFFBEA6FF),
-                secondary: const Color(0xFF7C55FF),
-                surface: const Color(0xFF121212),
-              ),
-              textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
-            ),
-            locale: localeProvider.locale,
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('en'), // English
-              Locale('tr'), // Turkish
-              Locale('de'), // German
-              Locale('fr'), // French
-              Locale('es'), // Spanish
-              Locale('ar'), // Arabic
-            ],
-            localeResolutionCallback: (locale, supportedLocales) {
-              for (var supportedLocale in supportedLocales) {
-                if (supportedLocale.languageCode == locale?.languageCode) {
-                  return supportedLocale;
-                }
+          return FutureBuilder(
+            future: localeProvider.initialize(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  home: Scaffold(
+                    backgroundColor: Color(0xFF040404),
+                    body: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                );
               }
-              return supportedLocales.first; // Default to English
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                title: 'Vera Music',
+                themeMode: ThemeMode.dark,
+                theme: ThemeData.dark().copyWith(
+                  scaffoldBackgroundColor: const Color(0xFF000000),
+                  colorScheme: ColorScheme.dark(
+                    primary: const Color(0xFFBEA6FF),
+                    secondary: const Color(0xFF7C55FF),
+                    surface: const Color(0xFF000000),
+                  ),
+                  textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+                ),
+                locale: localeProvider.locale,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [
+                  Locale('en'), // English
+                  Locale('tr'), // Turkish
+                  Locale('de'), // German
+                  Locale('fr'), // French
+                  Locale('es'), // Spanish
+                  Locale('ar'), // Arabic
+                ],
+                localeResolutionCallback: (locale, supportedLocales) {
+                  for (var supportedLocale in supportedLocales) {
+                    if (supportedLocale.languageCode == locale?.languageCode) {
+                      return supportedLocale;
+                    }
+                  }
+                  return supportedLocales.first; // Default to English
+                },
+                home: const MainShell(),
+              );
             },
-            home: const MainShell(),
           );
         },
       ),

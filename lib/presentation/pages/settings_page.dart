@@ -13,23 +13,10 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool darkMode = true;
   String quality = 'High';
-  String selectedLanguage = 'en'; // Default to English
-
-  final Map<String, String> languages = {
-    'en': 'English',
-    'tr': 'Türkçe',
-    'de': 'Deutsch',
-    'fr': 'Français',
-    'es': 'Español',
-    'ar': 'العربية',
-  };
 
   @override
   void initState() {
     super.initState();
-    // Get current locale
-    final localeProvider = context.read<LocaleProvider>();
-    selectedLanguage = localeProvider.locale.languageCode;
   }
 
   @override
@@ -65,29 +52,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 onChanged: (value) {
                   if (value != null) setState(() => quality = value);
                 },
-                dropdownColor: const Color(0xFF121212),
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-            const SizedBox(height: 10),
-            ListTile(
-              title: Text(l10n.language),
-              subtitle: Text(languages[selectedLanguage] ?? 'English'),
-              trailing: DropdownButton<String>(
-                value: selectedLanguage,
-                items: languages.entries.map((entry) {
-                  return DropdownMenuItem<String>(
-                    value: entry.key,
-                    child: Text(entry.value),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => selectedLanguage = value);
-                    localeProvider.setLocaleFromString(value);
-                  }
-                },
-                dropdownColor: const Color(0xFF121212),
+                dropdownColor: const Color(0xFF000000),
                 style: const TextStyle(color: Colors.white),
               ),
             ),

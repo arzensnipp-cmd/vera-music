@@ -26,11 +26,34 @@ class YoutubeService {
     }
   }
 
+  Future<List<Track>> getTrendingMusic() async {
+    try {
+      final searchList = await _youtube.search.search('trending music');
+      final results = searchList.take(20).toList();
+
+      return results.map((video) {
+        return Track(
+          id: video.id.value,
+          title: cleanTitle(video.title),
+          author: video.author,
+          duration: video.duration,
+          thumbnailUrl: video.thumbnails.mediumResUrl,
+          videoUrl: 'https://www.youtube.com/watch?v=${video.id.value}',
+        );
+      }).toList();
+    } catch (e) {
+      throw Exception('Trending müzik alınamadı: $e');
+    }
+  }
+
   Future<String?> getBestAudioStreamUrl(String videoId) async {
     try {
       final manifest = await _youtube.videos.streamsClient.getManifest(VideoId(videoId));
       final audioStream = manifest.audioOnly.withHighestBitrate();
-      return audioStream.url.toString();
+      if (audioStream != null) {
+        return audioStream.url.toString();
+      }
+      return null;
     } catch (e) {
       throw Exception('Ses akışı alınamadı: $e');
     }
