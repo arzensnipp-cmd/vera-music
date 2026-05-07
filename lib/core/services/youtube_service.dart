@@ -1,10 +1,14 @@
+import 'dart:async';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import '../../domain/entities/track.dart';
 
 class YoutubeService {
   final YoutubeExplode _youtube;
 
-  YoutubeService() : _youtube = YoutubeExplode();
+  YoutubeService()
+      : _youtube = YoutubeExplode(
+          clientType: ClientType.android,
+        );
 
   Future<List<Track>> searchTracks(String query) async {
     try {
@@ -66,12 +70,24 @@ class YoutubeService {
 
   Future<String?> getBestAudioStreamUrl(String videoId) async {
     try {
-      final manifest = await _youtube.videos.streamsClient.getManifest(VideoId(videoId));
+      // Kısa bir gecikme ekle (YouTube sunucusunun hazır olması için)
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // 10 saniye timeout ile manifest'i al
+      final manifest = await _youtube.videos.streamsClient
+          .getManifest(VideoId(videoId))
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => throw TimeoutException('Bağlantı zaman aşımına uğradı'),
+          );
+
       final audioStream = manifest.audioOnly.withHighestBitrate();
       if (audioStream != null) {
         return audioStream.url.toString();
       }
       return null;
+    } on TimeoutException {
+      throw Exception('Bağlantı zaman aşımına uğradı');
     } catch (e) {
       throw Exception('Bağlantı Başarısız: $e');
     }
