@@ -151,24 +151,34 @@ class _SearchPageState extends State<SearchPage> {
 
   Future<void> _playTrack(Track track) async {
     final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      SnackBar(content: Text('Oynatma başlatılıyor: ${track.title}')),
+    );
+
     try {
       final audioUrl = await _youtubeService.getBestAudioStreamUrl(track.id);
-      if (audioUrl != null) {
-        final mediaItem = MediaItem(
-          id: track.id,
-          title: track.title,
-          artist: track.author,
-          duration: track.duration,
-          artUri: Uri.parse(track.thumbnailUrl),
-          extras: {'audioUrl': audioUrl},
+      if (audioUrl == null || audioUrl.isEmpty) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Link hatası: URL bulunamadı')),
         );
-        await widget.audioHandler.addQueueItem(mediaItem);
-        await widget.audioHandler.play();
+        return;
       }
+
+      final mediaItem = MediaItem(
+        id: track.id,
+        title: track.title,
+        artist: track.author,
+        duration: track.duration,
+        artUri: Uri.parse(track.thumbnailUrl),
+        extras: {'audioUrl': audioUrl},
+      );
+      await widget.audioHandler.addQueueItem(mediaItem);
+      await widget.audioHandler.play();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.playbackFailed}: $e')),
+          SnackBar(content: Text('HATA: $e')),
         );
       }
     }
@@ -229,65 +239,71 @@ class _SearchPageState extends State<SearchPage> {
                   separatorBuilder: (_, __) => const SizedBox(height: 14),
                   itemBuilder: (context, index) {
                     final track = _tracks[index];
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF000000),
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
                         borderRadius: BorderRadius.circular(22),
-                      ),
-                      child: ListTile(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-                        contentPadding: const EdgeInsets.all(12),
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.network(
-                            track.thumbnailUrl,
-                            width: 64,
-                            height: 64,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              width: 64,
-                              height: 64,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                gradient: const LinearGradient(colors: [Color(0xFF7C55FF), Color(0xFFBEA6FF)]),
+                        onTap: () => _playTrack(track),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF000000),
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                          child: ListTile(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+                            contentPadding: const EdgeInsets.all(12),
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.network(
+                                track.thumbnailUrl,
+                                width: 64,
+                                height: 64,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  width: 64,
+                                  height: 64,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    gradient: const LinearGradient(colors: [Color(0xFF7C55FF), Color(0xFFBEA6FF)]),
+                                  ),
+                                  child: const Icon(Icons.music_note, color: Colors.white30),
+                                ),
                               ),
-                              child: const Icon(Icons.music_note, color: Colors.white30),
+                            ),
+                            title: Text(
+                              track.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                            ),
+                            subtitle: Text(
+                              track.author,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(color: Colors.white60),
+                            ),
+                            trailing: PopupMenuButton<String>(
+                              onSelected: (value) {
+                                if (value == 'add_to_playlist') {
+                                  _showAddToPlaylistDialog(track);
+                                } else if (value == 'download') {
+                                  _downloadTrack(track);
+                                }
+                              },
+                              itemBuilder: (context) => [
+                                PopupMenuItem(
+                                  value: 'add_to_playlist',
+                                  child: Text(l10n.addToPlaylist),
+                                ),
+                                PopupMenuItem(
+                                  value: 'download',
+                                  child: Text(l10n.download),
+                                ),
+                              ],
+                              icon: const Icon(Icons.more_vert, color: Colors.white70),
                             ),
                           ),
                         ),
-                        title: Text(
-                          track.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                        ),
-                        subtitle: Text(
-                          track.author,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white60),
-                        ),
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (value) {
-                            if (value == 'add_to_playlist') {
-                              _showAddToPlaylistDialog(track);
-                            } else if (value == 'download') {
-                              _downloadTrack(track);
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: 'add_to_playlist',
-                              child: Text(l10n.addToPlaylist),
-                            ),
-                            PopupMenuItem(
-                              value: 'download',
-                              child: Text(l10n.download),
-                            ),
-                          ],
-                          icon: const Icon(Icons.more_vert, color: Colors.white70),
-                        ),
-                        onTap: () => _playTrack(track),
                       ),
                     );
                   },

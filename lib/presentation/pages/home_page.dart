@@ -59,24 +59,34 @@ class _HomePageState extends State<HomePage> {
   Future<void> _playTrack(Track track) async {
     final l10n = AppLocalizations.of(context)!;
     final audioHandler = context.read<AudioHandler>();
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      SnackBar(content: Text('Oynatma başlatılıyor: ${track.title}')),
+    );
+
     try {
       final audioUrl = await _youtubeService.getBestAudioStreamUrl(track.id);
-      if (audioUrl != null) {
-        final mediaItem = MediaItem(
-          id: track.id,
-          title: track.title,
-          artist: track.author,
-          duration: track.duration,
-          artUri: Uri.parse(track.thumbnailUrl),
-          extras: {'audioUrl': audioUrl},
+      if (audioUrl == null || audioUrl.isEmpty) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Link hatası: URL bulunamadı')),
         );
-        await audioHandler.addQueueItem(mediaItem);
-        await audioHandler.play();
+        return;
       }
+
+      final mediaItem = MediaItem(
+        id: track.id,
+        title: track.title,
+        artist: track.author,
+        duration: track.duration,
+        artUri: Uri.parse(track.thumbnailUrl),
+        extras: {'audioUrl': audioUrl},
+      );
+      await audioHandler.addQueueItem(mediaItem);
+      await audioHandler.play();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.playbackFailed}: $e')),
+          SnackBar(content: Text('HATA: $e')),
         );
       }
     }
@@ -153,53 +163,60 @@ class _TrendingSection extends StatelessWidget {
         separatorBuilder: (_, __) => const SizedBox(height: 18),
         itemBuilder: (context, index) {
           final track = tracks[index];
-          return Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF000000),
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black54,
-                  blurRadius: 18,
-                  offset: Offset(0, 8),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(22),
-                    image: DecorationImage(
-                      image: NetworkImage(track.thumbnailUrl),
-                      fit: BoxFit.cover,
+          return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(28),
+            onTap: () => onTrackPlay(track),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF000000),
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black54,
+                    blurRadius: 18,
+                    offset: Offset(0, 8),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(22),
+                      image: DecorationImage(
+                        image: NetworkImage(track.thumbnailUrl),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 18),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(track.title,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              )),
-                      const SizedBox(height: 6),
-                      Text(track.author, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70)),
-                    ],
+                  const SizedBox(width: 18),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(track.title,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                )),
+                        const SizedBox(height: 6),
+                        Text(track.author, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70)),
+                      ],
+                    ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () => onTrackPlay(track),
-                  icon: const Icon(Icons.play_circle_fill, size: 34, color: Color(0xFFBEA6FF)),
-                )
-              ],
+                  IconButton(
+                    onPressed: () => onTrackPlay(track),
+                    icon: const Icon(Icons.play_circle_fill, size: 34, color: Color(0xFFBEA6FF)),
+                  )
+                ],
+              ),
             ),
-          );
+          ),
+        );
         },
       ),
     );
