@@ -1,10 +1,21 @@
+import 'package:http/http.dart' as http;
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import '../../domain/entities/track.dart';
+
+class _YoutubeHttpClient extends http.BaseClient {
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
+    // YouTube 403 engellemesini baypas etmek için gerçek User-Agent ekle
+    request.headers['User-Agent'] =
+        'Mozilla/5.0 (Linux; Android 12; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Mobile Safari/537.36';
+    return super.send(request);
+  }
+}
 
 class YoutubeService {
   final YoutubeExplode _youtube;
 
-  YoutubeService() : _youtube = YoutubeExplode();
+  YoutubeService() : _youtube = YoutubeExplode(httpClient: _YoutubeHttpClient());
 
   Future<List<Track>> searchTracks(String query) async {
     try {
@@ -71,9 +82,9 @@ class YoutubeService {
       if (audioStream != null) {
         return audioStream.url.toString();
       }
-      return null;
+      throw Exception('En yüksek bitrate ses akışı bulunamadı');
     } catch (e) {
-      throw Exception('Ses akışı alınamadı: $e');
+      throw Exception('Bağlantı Başarısız: $e');
     }
   }
 

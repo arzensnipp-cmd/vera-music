@@ -29,7 +29,7 @@ class VeraAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       final audioSources = items.map((item) {
         final audioUrl = item.extras?['audioUrl'] ?? item.id;
         if (audioUrl == null || audioUrl.isEmpty) {
-          throw Exception('Geçersiz audio URL: $audioUrl');
+          throw Exception('Bağlantı Başarısız: Audio URL bulunamadı');
         }
         return AudioSource.uri(Uri.parse(audioUrl));
       }).toList();
@@ -37,16 +37,14 @@ class VeraAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       await _playlist.addAll(audioSources);
       await _player.setAudioSource(_playlist);
     } catch (e) {
-      // Hata durumunda kullanıcıya uyarı ver, çökertme
       print('Şarkı yüklenirken hata: $e');
-      // Bir sonraki şarkıya geçmeyi dene
       if (items.length > 1) {
         final remainingItems = items.sublist(1);
         if (remainingItems.isNotEmpty) {
           await addQueueItems(remainingItems);
         }
       }
-      throw Exception('Şu an bu içeriğe erişilemiyor');
+      throw Exception('Bağlantı Başarısız');
     }
   }
 
