@@ -5,10 +5,7 @@ import '../../domain/entities/track.dart';
 class YoutubeService {
   final YoutubeExplode _youtube;
 
-  YoutubeService()
-      : _youtube = YoutubeExplode(
-          clientType: ClientType.android,
-        );
+  YoutubeService() : _youtube = YoutubeExplode();
 
   Future<List<Track>> searchTracks(String query) async {
     try {
